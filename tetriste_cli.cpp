@@ -19,12 +19,10 @@ void startCLI() {
 
     int keepNextPieces; // Est utilisé pour savoir si nous devons générer une nouvelle pièce (uniquement si nous avons effectué une insertion lors de l'itération précédente)
     int scoreAdded = 0; // Est utilisé pour suivre le score ajouté par la dernière action et l'afficher lors de la prochaine itération de la boucle
-    int colorCount = 4;
-    int shapeCount = 4;
 
     cout << "Voulez-vous charger une partie (o/n) ? ";
     char loadChoice;
-    loadChoice = getch() ;
+    loadChoice = getch();
     cout << endl;
 
     if(loadChoice == 'o') {
@@ -39,7 +37,44 @@ void startCLI() {
         }
     } 
     else {
+        cout << "\033[0m\033[0;0H\033[2J";
+        cout << "Choose the difficulty of the game:\n";
+        cout << "1. Easy (2 colors, 2 shapes)\n";
+        cout << "2. Medium (3 colors, 3 shapes)\n";
+        cout << "3. Hard (4 colors, 4 shapes)\n";
+        cout << "4. Custom\n" ;
+        cout << "Your choice: " ;
+        int difficulty, colorCount, shapeCount;
+        cin >> difficulty;
+        cout << "\n";
+
+        switch (difficulty) {
+            case 1:
+                colorCount = 2;
+                shapeCount = 2;
+                break;
+            case 2:
+                colorCount = 3;
+                shapeCount = 3;
+                break;
+            case 3:
+                colorCount = 4;
+                shapeCount = 4;
+                break;
+            case 4:
+                do {
+                    cout << "Number of colors (2-4): ";
+                    cin >> colorCount;
+                    cout << "Number of shapes (2-4): ";
+                    cin >> shapeCount;
+                    cout << "\n";
+                } while (colorCount < 2 || colorCount > 4 || shapeCount < 2 || shapeCount > 4);
+                break;
+            default:
+                break;
+        }
         currentGame = initGame(colorCount, shapeCount);
+
         for (int i = 0; i < 5; i++) {
             nextPieces[i] = generatePiece(currentGame->colorCount, currentGame->shapeCount);
         }
@@ -51,7 +86,7 @@ void startCLI() {
 
         cout << "\033[0m\033[0;0H\033[2J";
         displayGameInfo(currentGame, nextPieces, scoreAdded);
-
+        cout << "\n\n";
         displayMainMenu();
         char choice;
         choice = getch();
@@ -121,19 +156,28 @@ void startCLI() {
 
         scoreAdded = updateBoard(currentGame, isByShift);
         if (scoreAdded == -1) {
+            cout << "\033[0m\033[0;0H\033[2J";
+            cout << "------------------------------------------------------------------\n";
             cout << "VOUS AVEZ GAGNÉ !\nScore final : " << currentGame->score << endl;
+            cout << "------------------------------------------------------------------\n";
             askUpdateRankings(currentGame);
             // saveGame(currentGame, nextPieces, name);
             continueGame = 0;
         }
         if (currentGame->piecesCount >= 15) {
+            cout << "\033[0m\033[0;0H\033[2J";
+            cout << "------------------------------------------------------------------\n";
             cout << "VOUS AVEZ PERDU !\nScore final : " << currentGame->score << endl;
+            cout << "------------------------------------------------------------------\n";
             askUpdateRankings(currentGame);
             // saveGame(currentGame, nextPieces, name);
             continueGame = 0;
         }
         if (currentGame->piecesCount == 0) {
+            cout << "\033[0m\033[0;0H\033[2J";
+            cout << "------------------------------------------------------------------\n";
             cout << "VOUS AVEZ GAGNÉ !\nScore final : " << currentGame->score << endl;
+            cout << "------------------------------------------------------------------\n";
             askUpdateRankings(currentGame);
             continueGame = 0;
         }
@@ -151,7 +195,6 @@ void startCLI() {
 void askUpdateRankings(Game* currentGame) {
     cout << "Voulez-vous mettre à jour les classements (o/n) ? ";
     char updateChoice;
-    // cin >> updateChoice;
     updateChoice = getch(); 
     cout << endl;
     if (updateChoice == 'o') {
@@ -159,69 +202,52 @@ void askUpdateRankings(Game* currentGame) {
         cout << "Nom du joueur : ";
         cin >> name;
         updateRankings(currentGame->score, name);
-        // saveGame(currentGame, nextPieces, name);
     }
 }
 
 void displayGameInfo(Game *currentGame, Piece **nextPieces, int scoreAdded) {
-    cout << "\t\t\t-------------------------  TETRISTE  -------------------------\n";
+    cout << "\t\t\t---------------------------------  TETRISTE  ---------------------------------\n";
     cout << endl;
     cout << endl;
     if(scoreAdded == 0) {
-        cout << "\t\t\t\t\t\tScore actuel : " << currentGame->score << endl;
+        cout << "\t\t\t\t\t\t\t\t\t\t\tScore actuel : " << currentGame->score << endl;
     } else if(scoreAdded <= 5){ // Insertions
-        cout << "\t\t\t\t\t\tScore actuel : " << currentGame->score << " (+" << scoreAdded << ")\n";
+        cout << "\t\t\t\t\t\t\t\t\t\t\tScore actuel : " << currentGame->score << " (+" << scoreAdded << ")\n";
     } else {                    // Combos et/ou décalages
-        cout << "\t\t\t\t\t\tScore actuel : " << currentGame->score << " (Incroyable ! +" << scoreAdded << ")\n";
+        cout << "\t\t\t\t\t\t\t\t\t\t\tScore actuel : " << currentGame->score << " (Incroyable ! +" << scoreAdded << ")\n";
     }
     cout << endl;
     cout << endl;
     cout << "Prochaines pièces : ";
 
     for (int i = 0; i < 5; i++) {
-        cout << nextPieces[i]->displayStr << " ";
+        cout << nextPieces[i]->displayStr << "\t";
     }
     cout << "\033[31m<-- Élément suivant\033[0m\n";
         cout << endl;
         cout << endl;
     Piece *currentPiece = currentGame->head;
+    cout << "-------------------------------------------------------------------------------------------------\n";
     for (int i = 0; i < currentGame->piecesCount; i++) {
-        cout << "\t\t\t" << currentPiece->displayStr << " ";
+        cout << "\t" << currentPiece->displayStr << " ";
         currentPiece = currentPiece->next;
     }
+    cout << "\n-------------------------------------------------------------------------------------------------";
 
     cout << "\n\n";
 }
 
 void displayMainMenu() {
-    cout << "\t\t\tQue voulez-vous faire ?\n";
-    cout << "\t\t\tj. Insérer à gauche\n";
-    cout << "\t\t\tk. Insérer à droite\n";
-    cout << "\t\t\tb. Décaler par couleur bleu\n";
-    cout << "\t\t\ty. Décaler par couleur jaune\n";
-    cout << "\t\t\tr. Décaler par couleur rouge\n";
-    cout << "\t\t\tg. Décaler par couleur vert\n";
-    cout << "\t\t\ts. Décaler par forme carré\n";
-    cout << "\t\t\td. Décaler par forme losange\n";
-    cout << "\t\t\tc. Décaler par forme circle\n";
-    cout << "\t\t\tt. Décaler par forme triangle\n";
-    cout << "\t\t\tq. Quitter\n\n";
+    cout << "\t\t\t\t\tj. Insérer à gauche\n";
+    cout << "\t\t\t\t\tk. Insérer à droite\n";
+    cout << "\t\t\t\t\tb. Décaler par couleur \033[34mbleu\033[0m\n";
+    cout << "\t\t\t\t\ty. Décaler par couleur \033[33mjaune\033[0m\n";
+    cout << "\t\t\t\t\tr. Décaler par couleur \033[31mrouge\033[0m\n";
+    cout << "\t\t\t\t\tg. Décaler par couleur \033[32mvert\033[0m\n";
+    cout << "\t\t\t\t\ts. Décaler par forme carré ■\n";
+    cout << "\t\t\t\t\td. Décaler par forme losange ◊\n";
+    cout << "\t\t\t\t\tc. Décaler par forme circle ●\n";
+    cout << "\t\t\t\t\tt. Décaler par forme triangle ▲\n";
+    cout << "\t\t\t\t\tq. Quitter\n\n";
 }
 
-void displayColorMenu() {
-    cout << "Quelle couleur voulez-vous décaler ?\n";
-    cout << "b. Bleu\n";
-    cout << "y. Jaune\n";
-    cout << "r. Rouge\n";
-    cout << "g. Vert\n";
-    cout << "0. Retour\n";
-}
-
-void displayShapeMenu() {
-    cout << "Quelle forme voulez-vous décaler ?\n";
-    cout << "s. Carré\n";
-    cout << "d. Losange\n";
-    cout << "c. Cercle\n";
-    cout << "t. Triangle\n";
-    cout << "0. Retour\n";
-}

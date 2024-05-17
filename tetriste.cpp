@@ -317,7 +317,7 @@ int updateBoard(Game *game, int isByShift) {
 
 
 void saveGame(Game *game, Piece **nextPieces, string name){
-    ofstream file(name + ".txt");
+    ofstream file("./savedGames/" + name + ".txt");
     
     if (!file.is_open()) {
         cout << "Impossible d'ouvrir le fichier de sauvegarde !" << endl;
@@ -344,7 +344,7 @@ void saveGame(Game *game, Piece **nextPieces, string name){
 // Renvoie le jeu s'il a été chargé avec succès, NULL sinon (fichier inexistant ou corrompu/invalidé)
 Game* loadGame(Piece** nextPieces, string name) {
     string magic;
-    ifstream file(name + ".txt");
+    ifstream file("./savedGames/" + name + ".txt");
     if (!file.is_open()) {
         cout << "Cette sauvegarde n'existe pas !" << endl;
         return nullptr;
